@@ -7,7 +7,7 @@ HexVPN is a Python script that sets up a VPN connection using Riseup's VPN servi
 - Fetches VPN client certificates from Riseup's API
 - Retrieves VPN gateway configurations
 - Measures latency to select the fastest gateway
-- Creates and configures the `ovpn-e.conf` file for use with OpenVPN
+- Creates and configures the `.hexvpn-base.conf` file for use with OpenVPN
 
 ## Requirements
 
