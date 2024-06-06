@@ -38,7 +38,7 @@ HexVPN is a Python script that sets up a VPN connection using Riseup's VPN servi
 2. Run the script:
 
     ```sh
-    python hexvpn.py
+    python3 hexvpn.py
     ```
 
 3. Upon successful completion, run the following command to start the VPN:
