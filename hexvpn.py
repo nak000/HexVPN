@@ -1,5 +1,6 @@
-import requests
 import subprocess
+import sys
+import importlib
 
 OUTPUT_FILE = "hexvpn-ovpn.conf"
 API_CERT_URL = "https://api.black.riseup.net/3/cert"
@@ -10,7 +11,31 @@ def verbose_log(message):
     if VERBOSE:
         print(f"> {message}")
 
+def install_package(package_name):
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    except subprocess.CalledProcessError as e:
+        verbose_log(f"Failed to install package {package_name}: {e}")
+        verbose_log("Attempting to install with --break-system flag...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package_name, "--break-system"])
+        except subprocess.CalledProcessError as e:
+            verbose_log(f"Failed to install package {package_name} with --break-system flag: {e}")
+            sys.exit(1)
+
+def check_and_install_requirements():
+    try:
+        importlib.import_module('requests')
+    except ImportError:
+        verbose_log("requests module not found. Installing...")
+        install_package('requests')
+
+    if subprocess.run(["ping", "-c", "1", "127.0.0.1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode != 0:
+        verbose_log("ping utility not found. Please install ping.")
+        sys.exit(1)
+
 def fetch_data(url):
+    import requests
     response = requests.get(url, timeout=5)
     response.raise_for_status()
     return response.text if 'cert' in url else response.json()
@@ -60,6 +85,8 @@ def update_conf_with_gateway(output_file, gateway, latency):
 
 def main():
     verbose_log("Starting HexVPN setup...")
+
+    check_and_install_requirements()
 
     verbose_log(f"Fetching VPN client certs from: {API_CERT_URL}")
     key_cert = fetch_data(API_CERT_URL)
